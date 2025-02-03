@@ -1,12 +1,20 @@
 // TODO: Import required modules
 // Hint: You will need the 'fs' module for reading the file and the 'chalk' library for coloring the words.
+const fs = require('fs');
+const chalk = require('chalk');
 
 /**
  * Synchronously reads the content of 'declaration.txt'.
  * @returns {string} The content of the file.
  */
 function readFileContent() {
-    // TODO: Use the 'fs' module to synchronously read the content of 'declaration.txt' and return it.
+    try {
+        const data = fs.readFileSync('declaration.txt', 'utf8'); // Synchronous read
+        return data;
+    } catch (err) {
+        console.error('Error reading the file:', err);
+        return ''; // Return an empty string in case of an error
+    }
 }
 
 /**
@@ -15,11 +23,15 @@ function readFileContent() {
  * @returns {Object} An object with words as keys and their occurrences as values.
  */
 function getWordCounts(content) {
-    // TODO: Implement a function to count occurrences of each word in the content.
-    // Hint: Consider splitting the content into words and then tallying the counts.
     const wordCount = {};
     const words = content.split(/\W+/).filter(Boolean); // Splitting by non-word characters.
+    
+    words.forEach(word => {
+        const lowerCaseWord = word.toLowerCase(); // Normalize words to lowercase
+        wordCount[lowerCaseWord] = (wordCount[lowerCaseWord] || 0) + 1;
+    });
 
+    return wordCount;
 }
 
 /**
@@ -29,11 +41,13 @@ function getWordCounts(content) {
  * @returns {string} The colored word.
  */
 function colorWord(word, count) {
-    // TODO: Return the word colored based on its frequency using the 'chalk' library.
-    // For example: 
-    // - Words that occur once can be blue
-    // - Words that occur between 2 and 5 times can be green
-    // - Words that occur more than 5 times can be red
+    if (count === 1) {
+        return chalk.blue(word); // Blue for words that occur once
+    } else if (count >= 2 && count <= 5) {
+        return chalk.green(word); // Green for words occurring between 2 and 5 times
+    } else {
+        return chalk.red(word); // Red for words occurring more than 5 times
+    }
 }
 
 /**
@@ -42,11 +56,12 @@ function colorWord(word, count) {
  * @param {Object} wordCount The word occurrences.
  */
 function printColoredLines(content, wordCount) {
-    const lines = content.split('\n').slice(0, 15);
+    const lines = content.split('\n').slice(0, 15); // Get first 15 lines
 
     for (const line of lines) {
         const coloredLine = line.split(/\W+/).map(word => {
-            // TODO: Color the word based on its frequency using the 'colorWord' function.
+            const lowerCaseWord = word.toLowerCase();
+            return word ? colorWord(word, wordCount[lowerCaseWord] || 0) : word;
         }).join(' ');
 
         console.log(coloredLine);
@@ -69,3 +84,10 @@ if (require.main === module) {
 
 // TODO: Export the functions for testing
 // Hint: You can use the 'module.exports' syntax.
+module.exports = {
+    readFileContent,
+    getWordCounts,
+    colorWord,
+    printColoredLines,
+    processFile
+};
